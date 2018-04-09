@@ -11,7 +11,10 @@ A functional one, to allow us to think about types simply. Certainly a kind of M
 We don't want to share *non-useful-information* (like indentations...), we can't use traditional patch format.
 
 #### A layer over git ?
- We want to share code, and `git` allow us to do it simply. At least, we need to import/export to a proper git repository, but can we make everything to work over it ?
+We want to share code, and `git` allow us to do it simply. At least, we need to import/export to a proper git repository, but can we make everything to work over it ?
+
+#### A text editor ?
+Because do not want VIT to stop a programmer during its work for a conflict if he don't need the concerned code right now, we have to interract with him. A common place to do it is within an IDE.
 
 ### Random Ideas
 To use a descendant way-to-think, we started to think about something like
