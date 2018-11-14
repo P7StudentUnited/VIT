@@ -1,0 +1,4 @@
+#!/usr/bin/env sh
+
+make
+utop -I _build/ -require pprint -require inferno _build/lang.cma
