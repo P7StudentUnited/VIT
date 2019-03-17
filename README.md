@@ -1,65 +1,75 @@
 # VIT
 ## Blackboard summary
 ### Goal
-Allow a team to develop synchronously a software, without having merge conflict every `git pull`
+Allow a team to develop synchronously a software, without having merge conflict every `git pull`.
 
 ### How to do it ?
 ####  Use our own programming language
-A functional one, to allow us to think about types simply. Certainly a kind of MiniMl, see #3 
+A functional one, to allow us to think about types simply. Certainly a kind of MiniMl, see #3.
 
 #### Develop an abstract patch language
 We don't want to share *non-useful-information* (like indentations...), we can't use traditional patch format.
 
-Also, a patch is often a *living thing*, others developpers will want to change a line or two before including it.
-So we have to develop a strategy about a patch life: Someone write a change, send it over the network, and others rate it, or apply minor changes, and then approve it. And of course including this strategy in a VIT's patch life.
+A VIT patch is an abstract structure, like:
+```Ocaml
+type ('a, 'b) either = Left of 'a | Right of 'b
+module
+  type t (* The patch itself *)
+  type helper (* To recover from a patch application failure *)
 
-##### The merge problem
-How do we solve the merge problem:
-* If two patchs are *othogonal*, it means that they don't change the same part of the code, then they commute, and we can add it in any order
-* Otherwise, it is more complicated. Do we ask help to the user ? Or try something like `darcs` ?
+  (* From two states of the same program, infer a list of patches of type t *)
+  val infer : prog -> prog -> t list
+  (* We can also imagine a dual to helper for infer *)
 
-##### Describe change's implications
-Imagine I am renaming a function. I can "annotate" the concerned line with a tactic to solve a merge issue (like `rename f() in g()`) and let VIT handle this for us.
+  (* Given a proram and a patch, try to apply it. The result is either a program or a helper, aiming to help to recover from this failure *)
+  val apply : prog -> t -> (prog,helper) either
 
-#### A layer over git ?
-We want to share code, and `git` allow us to do it simply. At least, we need to import/export to a proper git repository, but can we make everything to work over it ?
--> See the Server part.
+  (* Given a helper, try to recover from the failure *)
+  val use_helper : prog -> helper -> (option context -> option prog) -> helper
 
-#### A text editor ?
-Because do not want VIT to stop a programmer during its work for a conflict if he don't need the concerned code right now, we have to interract with him. A common place to do it is within an IDE.
+  (* Serialize *)
+  val serialize : t -> string
 
-### Random Ideas
-To use a descendant way-to-think, we started to think about something like
+  (* Deserialize *)
+  val deserialize : string -> t
+end
 ```
-AST ast = init()
-startThread:
-  while notEnded:
-    Patch patch = receive()
-     if(validate(patch))
-       ast = apply(ast, patch)
-  endSession(ast)
 
-startThread:
-  while notEnded:
-    Patch patch = commit()
-    if(validate(patch))
-      send(patch)
-```
+For example, we can imagine the following patch types:
+
+* Addition
+* Deletion
+* alpha-conversion
+* commutativity of arguments
+* ...
+
+#### The workflow
+Then the workflow is similar to:
+
+* Code
+* Commit:
+  * Pull from the server
+  * Verify that we are up to date
+  * Infer patches
+* Send patches
+
+Dually, we:
+
+* Receive a patch
+* Try to apply it:
+  * If we fail, ask the user for help!
 
 ### Server
-A centralized server, but everyone has a local clone of the depo (à la git)
+There is a server centralizing a _canonical_ list of VIT patches, for now stored in git repository.
 
-First approximation: One server per project, one file per project
-
-A server can receive different patches:
-
-* A low-level patch, like a simple addition, for which VIT can infer the nature of the patch
-* A high-level patch otherwise
-
-The server will certainly delegate the user gestion, and low-level things, to gitolite.
+The client can download this list to produce the source code. Then users can have different source codes, but all have the same list of VIT patches. We indeed just want to ensure the property that all codes have the same semantic.
 
 #### Validate
 This will certainly be dependent of who sent the patch, and evaluate it the code is well typed, if it compile, or maybe if it pass through user-defined tests.
 
+### A layer over git ?
+We want to share code, and `git` allow us to do it simply. At least, we need to import/export to a proper git repository, but can we make everything to work over it?
+-> See the Server part.
+
 ### Basic case
-Imagine I am working over a simple project, and I am committing **only** a new top level declaration (like a new function). How VIT will handle it ?
+Imagine I am working over a simple project, and I am committing **only** a new top level declaration (like a new function). How VIT will handle it?
