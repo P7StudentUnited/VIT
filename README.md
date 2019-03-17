@@ -1,18 +1,18 @@
 # VIT
 ## Blackboard summary
 ### Goal
-Allow a team to develop synchronously a software, without having merge conflict every `git pull`
+Allow a team to develop synchronously a software, without having merge conflict every `git pull`.
 
 ### How to do it ?
 ####  Use our own programming language
-A functional one, to allow us to think about types simply. Certainly a kind of MiniMl, see #3 
+A functional one, to allow us to think about types simply. Certainly a kind of MiniMl, see #3.
 
 #### Develop an abstract patch language
 We don't want to share *non-useful-information* (like indentations...), we can't use traditional patch format.
 
 A VIT patch is an abstract structure, like:
 ```Ocaml
-type 'a 'b either = Left of 'a | Right of 'b
+type ('a, 'b) either = Left of 'a | Right of 'b
 module
   type t (* The patch itself *)
   type helper (* To recover from a patch application failure *)
@@ -22,7 +22,7 @@ module
   (* We can also imagine a dual to helper for infer *)
 
   (* Given a proram and a patch, try to apply it. The result is either a program or a helper, aiming to help to recover from this failure *)
-  val apply : prog -> t -> prog helper either
+  val apply : prog -> t -> (prog,helper) either
 
   (* Given a helper, try to recover from the failure *)
   val use_helper : prog -> helper -> (option context -> option prog) -> helper
