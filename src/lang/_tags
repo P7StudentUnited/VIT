@@ -1,0 +1,2 @@
+<*> : use_menhir, package(pprint), package(unix), package(str), package(inferno)
+<*> : package(ocaml-compiler-libs)
