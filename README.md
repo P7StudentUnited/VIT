@@ -21,8 +21,8 @@ module
   val infer : prog -> prog -> t list
   (* We can also imagine a dual to helper for infer *)
 
-  (* Given a proram and a patch, try to apply it. The result is either a program or a helper, aiming to help to recover from this failure *)
-  val apply : prog -> t -> (prog,helper) either
+  (* Given a proram and a patch, try to apply it. The result is either a program or a helper, aiming to help to recover from this failure. The log explains the decisions. *)
+  val apply : prog -> t -> (prog * log, helper) either
 
   (* Given a helper, try to recover from the failure *)
   val use_helper : prog -> helper -> (option context -> option prog) -> helper
